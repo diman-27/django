@@ -1,0 +1,70 @@
+import React, { useState, useEffect } from 'react';
+
+const Timer = () => {
+  const [seconds, setSeconds] = useState(0);
+  const [inputValue, setInputValue] = useState('');
+  const [started, setStarted] = useState(false);
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const startTimer = () => {
+    const parsedValue = parseInt(inputValue, 10);
+    if (!isNaN(parsedValue) && parsedValue >= 0) {
+      setSeconds(parsedValue);
+      setStarted(true);
+    }
+  };
+
+  useEffect(() => {
+    let interval = null;
+    if (started) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+    }
+    return () => {
+      clearInterval(interval);
+    };
+  }, [started]);
+
+  useEffect(() => {
+    if (seconds === 0) {
+      // Отправить запрос на сервер, чтобы уведомить о завершении таймера
+      fetch('/api/endpoint', {
+        method: 'POST',
+        // Дополнительные параметры запроса, если необходимо
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Обработка ответа от сервера, если необходимо
+        })
+        .catch((error) => {
+          // Обработка ошибок, если необходимо
+        });
+    }
+  }, [seconds]);
+
+  return (
+    <div>
+      {!started ? (
+        <div>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+          />
+          <button disabled={isNaN(inputValue) || inputValue < 0} onClick={startTimer}>
+            Начать!
+          </button>
+        </div>
+      ) : (
+        <div>{seconds}</div>
+      )}
+      {seconds === 0 && <div>Готово!!!</div>}
+    </div>
+  );
+};
+
+export default Timer;
